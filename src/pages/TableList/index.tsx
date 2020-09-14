@@ -55,18 +55,11 @@ const data = [
   },
 ];
 class TableList extends React.Component<SecurityLayoutProps, SecurityLayoutState> {
-  state: SecurityLayoutState = {
-    isReady: false,
-  };
-
   componentDidMount() {
-    this.setState({
-      isReady: true,
-    });
     const { dispatch } = this.props;
     if (dispatch) {
       dispatch({
-        type: 'user/fetchCurrent',
+        type: 'tableList/fetchCurrency',
       });
     }
   }
