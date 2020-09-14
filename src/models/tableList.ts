@@ -1,6 +1,6 @@
 import { Effect, Reducer } from 'umi';
 
-import { queryCurrent, query as queryUsers } from '@/services/settings';
+import { getHistory } from '@/services/tableList';
 
 export interface CurrentUser {
   avatar?: string;
@@ -41,6 +41,14 @@ const tableListModel: TableListType = {
   },
 
   effects: {
+    *fetchCurrency(_, { call, put }) {
+      const res = yield call(getHistory);
+      console.log(res)
+      yield put({
+        type: 'save',
+        payload: response,
+      });
+    },
     // *fetch(_, { call, put }) {
     //   const response = yield call(queryUsers);
     //   yield put({
