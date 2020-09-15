@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Form, Select, Checkbox, InputNumber, Button, notification } from 'antd'
 import currencyNames from '@/utils/currencyNames'
-import { connect, Dispatch } from 'umi'
 
 export interface SettingFieldsType {
   period: number;
@@ -23,7 +22,7 @@ export const getFields = ():SettingFieldsType => {
 }
 
 const { Option } = Select;
-const Settings: React.FC<{ dispatch: Dispatch }> = ({ dispatch }) => {
+const Settings: React.FC<> = () => {
   const [settingFields, setSettingFields] = useState(getFields())
 
   const onFinish = (fields: SettingFieldsType) => {
@@ -51,14 +50,14 @@ const Settings: React.FC<{ dispatch: Dispatch }> = ({ dispatch }) => {
       >
         <Select placeholder="Please select a base currency">
           {
-            currencyNames.map(name => <Option value={name}>{name}</Option>)
+            currencyNames.map(name => <Option value={name} key={name}>{name}</Option>)
           }
         </Select>
       </Form.Item>
       <Form.Item name="symbols" label="Currency List">
         <Checkbox.Group>
           {
-            currencyNames.map(name => <Checkbox value={name}>{name}</Checkbox>)
+            currencyNames.map(name => <Checkbox value={name} key={name}>{name}</Checkbox>)
           }
         </Checkbox.Group>
       </Form.Item>
