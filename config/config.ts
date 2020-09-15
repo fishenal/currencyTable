@@ -18,9 +18,9 @@ export default defineConfig({
   //   // default true, when it is true, will use `navigator.language` overwrite default
   //   baseNavigator: true,
   // },
-  dynamicImport: {
-    loading: '@/components/PageLoading/index',
-  },
+  // dynamicImport: {
+  //   loading: '@/components/PageLoading/index',
+  // },
   targets: {
     ie: 8,
   },
@@ -37,7 +37,7 @@ export default defineConfig({
         },
         {
           path: '/settings',
-          name: 'set',
+          name: 'settings',
           component: './Settings',
         },
         {
