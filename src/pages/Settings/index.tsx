@@ -1,41 +1,73 @@
-import React from 'react';
-import { connect, ConnectProps } from 'umi';
-import { ConnectState } from '@/models/connect';
-// import { CurrentUser } from '@/models/user';
-// import { Table } from 'antd';
+import React, { useState } from 'react'
+import { Form, Select, Checkbox, InputNumber, Button, notification } from 'antd'
+import currencyNames from '@/utils/currencyNames'
+import { connect, Dispatch } from 'umi'
 
-interface SecurityLayoutProps extends ConnectProps {
-  loading?: boolean;
-  currentUser?: CurrentUser;
+export interface SettingFieldsType {
+  period: number;
+  base: string;
+  symbols: string[];
+}
+const initFields = {
+  period: 1,
+  base: 'CNY',
+  symbols: currencyNames
+}
+const localKey = 'currency_demo_setting_fields'
+const saveFields = (fields: SettingFieldsType) => {
+  window.localStorage.setItem(localKey, JSON.stringify(fields))
+}
+export const getFields = ():SettingFieldsType => {
+  const fields = window.localStorage.getItem(localKey)
+  return fields === null ? initFields : JSON.parse(fields)
 }
 
-interface SecurityLayoutState {
-  isReady: boolean;
-}
+const { Option } = Select;
+const Settings: React.FC<{ dispatch: Dispatch }> = ({ dispatch }) => {
+  const [settingFields, setSettingFields] = useState(getFields())
 
-class Settings extends React.Component<SecurityLayoutProps, SecurityLayoutState> {
-  state: SecurityLayoutState = {
-    isReady: false,
+  const onFinish = (fields: SettingFieldsType) => {
+    setSettingFields(fields)
+    saveFields(fields)
+    notification.success({message: 'Saved!'})
+    // dispatch({
+    //   type: 'tableList/fetchCurrency',
+    // });
   };
 
-  componentDidMount() {
-    this.setState({
-      isReady: true,
-    });
-    const { dispatch } = this.props;
-    if (dispatch) {
-      dispatch({
-        type: 'user/fetchCurrent',
-      });
-    }
-  }
-
-  render() {
-    return <>settings</>
-  }
+  return <Form
+    onFinish = {onFinish}
+    initialValues = {settingFields}
+  >
+      <Form.Item label="Auto refresh period">
+        <Form.Item name="period" noStyle>
+          <InputNumber min={1} max={30} />
+        </Form.Item>
+        <span className="ant-form-text"> minus </span>
+      </Form.Item>
+      <Form.Item
+        name="base"
+        label="Base currency"
+      >
+        <Select placeholder="Please select a base currency">
+          {
+            currencyNames.map(name => <Option value={name}>{name}</Option>)
+          }
+        </Select>
+      </Form.Item>
+      <Form.Item name="symbols" label="Currency List">
+        <Checkbox.Group>
+          {
+            currencyNames.map(name => <Checkbox value={name}>{name}</Checkbox>)
+          }
+        </Checkbox.Group>
+      </Form.Item>
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Save
+        </Button>
+      </Form.Item>
+  </Form>
 }
 
-export default connect(({ settings, tableList }: ConnectState) => ({
-  // currentUser: user.currentUser,
-  // loading: loading.models.user,
-}))(Settings);
+export default Settings;

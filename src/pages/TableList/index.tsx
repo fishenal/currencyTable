@@ -1,75 +1,56 @@
-import React from 'react';
-import { connect, ConnectProps } from 'umi';
-import { ConnectState } from '@/models/connect';
-// import { CurrentUser } from '@/models/user';
-import { Table } from 'antd';
+import React, { useEffect } from 'react'
+import { connect, Dispatch } from 'umi'
+import { ConnectState } from '@/models/connect'
+import { getFields } from '@/pages/Settings'
+import { Table } from 'antd'
+import Chart from './components/Chart'
+import Exchange from './components/Exchange'
 
-interface SecurityLayoutProps extends ConnectProps {
-  loading?: boolean;
-  currentUser?: CurrentUser;
-}
+const TableList: React.FC<{
+  dispatch: Dispatch;
+  cols: Array<{}>;
+  rowData: Array<{}>;
+}> = ({ dispatch, cols, rowData }) => {
+  useEffect(() => {
+    dispatch({
+      type: 'tableList/fetchCurrency',
+    });
+  }, [])
 
-interface SecurityLayoutState {
-  isReady: boolean;
-}
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    render: text => <a>{text}</a>,
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address',
-    key: 'address',
-  },
-];
-
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    tags: ['nice', 'developer'],
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    tags: ['loser'],
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    tags: ['cool', 'teacher'],
-  },
-];
-class TableList extends React.Component<SecurityLayoutProps, SecurityLayoutState> {
-  componentDidMount() {
-    const { dispatch } = this.props;
-    if (dispatch) {
-      dispatch({
-        type: 'tableList/fetchCurrency',
-      });
+  const { base } = getFields();
+  const rtOnRow = (record: {}) => {
+    return {
+      onClick: () => {
+        dispatch({
+          type: 'tableList/rowSelect',
+          payload: {
+            record
+          }
+        });
+      },
+      onDoubleClick: () => {
+        dispatch({
+          type: 'tableList/toggleExchange',
+          payload: true
+        })
+      },
     }
   }
-
-  render() {
-    return <Table columns={columns} dataSource={data} />
-  }
+  return <>
+    <p>Base: { base }</p>
+    <Table 
+      columns={cols} 
+      dataSource={rowData} 
+      style={{ width: '100%'}} 
+      tableLayout="fixed"
+      onRow={rtOnRow}
+    />
+    <Chart />
+    <Exchange />
+  </>
 }
 
-export default connect(({ user, loading }: ConnectState) => ({
-  // currentUser: user.currentUser,
-  // loading: loading.models.user,
+export default connect(({ tableList }: ConnectState) => ({
+  cols: tableList.cols,
+  rowData: tableList.rowData,
 }))(TableList);

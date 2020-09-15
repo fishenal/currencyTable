@@ -1,92 +1,112 @@
 import { Effect, Reducer } from 'umi';
-
 import { getHistory } from '@/services/tableList';
+import { getLastDays } from '@/utils/utils';
+import { getFields } from '@/pages/Settings';
 
-export interface CurrentUser {
-  avatar?: string;
-  name?: string;
-  title?: string;
-  group?: string;
-  signature?: string;
-  tags?: {
-    key: string;
-    label: string;
-  }[];
-  userid?: string;
-  unreadCount?: number;
-}
-
-export interface UserModelState {
-  currentUser?: CurrentUser;
-}
-
-export interface TableListType {
+export interface ITableListModel {
   namespace: 'tableList';
-  state: UserModelState;
+
+  state: {
+    rowData: any[];
+    dateKeys: string[];
+    cols: any[];
+    selectRow: {};
+    isShowExchange: boolean;
+  }
+
   effects: {
-    fetch: Effect;
-    fetchCurrent: Effect;
-  };
+    [fname: string]: Effect
+  }
+
   reducers: {
-    saveCurrentUser: Reducer<UserModelState>;
-    changeNotifyCount: Reducer<UserModelState>;
-  };
+    [fname: string]: Reducer
+  }
 }
 
-const tableListModel: TableListType = {
+const tableListModel: ITableListModel = {
   namespace: 'tableList',
 
   state: {
-    currentUser: {},
+    rowData: [],
+    dateKeys: [],
+    cols: [],
+    selectRow: {},
+    isShowExchange: false,
   },
 
   effects: {
     *fetchCurrency(_, { call, put }) {
-      const res = yield call(getHistory);
-      console.log(res)
-      yield put({
-        type: 'save',
-        payload: response,
+      const days = getLastDays();
+      const { base, symbols } = getFields();
+      const res = yield call(getHistory, {
+        ...days,
+        base,
+        symbols: symbols.join(',')
       });
+      if (res.rates) {
+        yield put({
+          type: 'setRates',
+          payload: res.rates,
+        });
+        yield put({
+          type: 'setCols',
+        });
+      }
     },
-    // *fetch(_, { call, put }) {
-    //   const response = yield call(queryUsers);
-    //   yield put({
-    //     type: 'save',
-    //     payload: response,
-    //   });
-    // },
-    // *fetchCurrent(_, { call, put }) {
-    //   const response = yield call(queryCurrent);
-    //   yield put({
-    //     type: 'saveCurrentUser',
-    //     payload: response,
-    //   });
-    // },
   },
 
   reducers: {
-    // saveCurrentUser(state, action) {
-    //   return {
-    //     ...state,
-    //     currentUser: action.payload || {},
-    //   };
-    // },
-    // changeNotifyCount(
-    //   state = {
-    //     currentUser: {},
-    //   },
-    //   action,
-    // ) {
-    //   return {
-    //     ...state,
-    //     currentUser: {
-    //       ...state.currentUser,
-    //       notifyCount: action.payload.totalCount,
-    //       unreadCount: action.payload.unreadCount,
-    //     },
-    //   };
-    // },
+    setRates(state, { payload: rates}) {
+      const dateKeys = Object.keys(rates).sort()
+      const { symbols } = getFields()
+      const rowData = symbols.map(currency => {
+        const rowObj = {
+          currency,
+          key: currency,
+        }
+        dateKeys.forEach(date => {
+          rowObj[date] = rates[date][currency]
+        })
+        return rowObj
+      })
+      return {
+        ...state,
+        dateKeys,
+        rowData,
+      };
+    },
+    setCols(state) {
+      const dateKeysLength = state.dateKeys.length
+      const last5Dayskeys = state.dateKeys.slice(dateKeysLength - 5, dateKeysLength)
+      const last5DaysCols = last5Dayskeys.map((key: string) => ({
+        title: key,
+        dataIndex: key,
+        key,
+      }))
+      const staticCols = [
+        {
+          title: 'Currency',
+          dataIndex: 'currency',
+          key: 'currency',
+        },
+      ]
+      return {
+        ...state,
+        cols: [...staticCols, ...last5DaysCols]
+      }
+    },
+    rowSelect(state, { payload: { record } }) {
+      return {
+        ...state,
+        selectRow: record
+      }
+    },
+    toggleExchange(state, { payload }) {
+      return {
+        ...state,
+        isShowExchange: payload
+      }
+    },
   },
 };
 

@@ -43,6 +43,7 @@
     "not ie <= 10"
   ],
   "dependencies": {
+    "@ant-design/charts": "^0.9.13",
     "@ant-design/icons": "^4.0.0",
     "@umijs/route-utils": "^1.0.32",
     "antd": "^4.6.3",
