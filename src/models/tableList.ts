@@ -77,8 +77,8 @@ const tableListModel: ITableListModel = {
     },
     setCols(state) {
       const dateKeysLength = state.dateKeys.length
-      const last5Dayskeys = state.dateKeys.slice(dateKeysLength - 5, dateKeysLength)
-      const last5DaysCols = last5Dayskeys.map((key: string) => ({
+      // const last5Dayskeys = state.dateKeys.slice(dateKeysLength - 5, dateKeysLength)
+      const daysCols = state.dateKeys.map((key: string) => ({
         title: key,
         dataIndex: key,
         key,
@@ -92,7 +92,7 @@ const tableListModel: ITableListModel = {
       ]
       return {
         ...state,
-        cols: [...staticCols, ...last5DaysCols]
+        cols: [...staticCols, ...daysCols]
       }
     },
     rowSelect(state, { payload: { record } }) {
