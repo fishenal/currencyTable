@@ -31,7 +31,7 @@ export default function Layout() {
   const history = useHistory();
   const path = location.pathname;
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (_, newValue) => {
     history.push(newValue)
   };
 
@@ -50,12 +50,12 @@ export default function Layout() {
       <Switch>
         <Route path="/currencies">
           <Box p={3}>
-            <Typography><Currencies /></Typography>
+            <Currencies />
           </Box>
         </Route>
         <Route path="/setting">
           <Box p={3}>
-            <Typography><Setting /></Typography>
+            <Setting />
           </Box>
         </Route>
       </Switch>
